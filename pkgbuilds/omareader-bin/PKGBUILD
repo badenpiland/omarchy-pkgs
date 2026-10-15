@@ -1,7 +1,7 @@
 # Maintainer: Baden Piland <github@ps.pilandcloud.com>
 pkgname=omareader-bin
 _pkg=omareader
-pkgver=0.3.0
+pkgver=0.3.1
 pkgrel=1
 pkgdesc="Restyle Chromium pages with the active Omarchy theme (extension + native host)"
 arch=('any')
@@ -21,8 +21,8 @@ _extid=mhglniaepbokfgnpeennihlifandcgjh
 source=("$_pkg::git+$url.git#tag=v$pkgver"
         "$_pkg-$pkgver.crx::$url/releases/download/v$pkgver/omareader.crx"
         "omareader-cleanup-legacy")
-sha256sums=('09a2338424b63b710bd3eb7c16e44e5c0e9569370815aac42ef9e67e1fbf56a7'
-            '916679de9d2cdb6753ea62ed4e62255730734cbcbe0dc48e40304c016642c182'
+sha256sums=('a11a4dac4c2b77ceccbd949766fd49ef969e6e24bd75d9f8bce50b353a3e6c75'
+            'b90dfb0a75c5269a152c2dad71b3dc5d6800eae277c46ed63b5e1e99fc6bc209'
             'cafed00b903de465436575c3df37d1e9088d7ac82d39d73d6d920df32bdea98d')
 # makepkg treats a CRX as a zip. Leave the signed file intact.
 noextract=("${_pkg}-${pkgver}.crx")
