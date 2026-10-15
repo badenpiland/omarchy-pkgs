@@ -1,7 +1,7 @@
 # Maintainer: Baden Piland <github@ps.pilandcloud.com>
 pkgname=omareader-bin
 _pkg=omareader
-pkgver=0.2.2
+pkgver=0.3.0
 pkgrel=1
 pkgdesc="Restyle Chromium pages with the active Omarchy theme (extension + native host)"
 arch=('any')
@@ -21,8 +21,8 @@ _extid=mhglniaepbokfgnpeennihlifandcgjh
 source=("$_pkg::git+$url.git#tag=v$pkgver"
         "$_pkg-$pkgver.crx::$url/releases/download/v$pkgver/omareader.crx"
         "omareader-cleanup-legacy")
-sha256sums=('f240ada159b973b5cf5cceca4d83524ffbda86fe73a1ce03e4b34707df950d02'
-            '7c777f1841afa64f2eaef669a039f245b2b9ea359582c693a5decf975c1028ba'
+sha256sums=('09a2338424b63b710bd3eb7c16e44e5c0e9569370815aac42ef9e67e1fbf56a7'
+            '916679de9d2cdb6753ea62ed4e62255730734cbcbe0dc48e40304c016642c182'
             'cafed00b903de465436575c3df37d1e9088d7ac82d39d73d6d920df32bdea98d')
 # makepkg treats a CRX as a zip. Leave the signed file intact.
 noextract=("${_pkg}-${pkgver}.crx")
@@ -42,9 +42,13 @@ package() {
   install -Dm755 omareader-cleanup-legacy "$pkgdir/usr/bin/omareader-cleanup-legacy"
   install -Dm644 "$_pkg-$pkgver.crx" "$pkgdir/usr/share/$_pkg/omareader.crx"
 
-  local ext host d
+  local ext host probe d
   ext=$(printf '{\n  "external_crx": "/usr/share/%s/omareader.crx",\n  "external_version": "%s"\n}\n' "$_pkg" "$pkgver")
   host=$(printf '{\n  "name": "com.bhp.omareader",\n  "description": "Omareader Omarchy theme host",\n  "path": "/usr/lib/%s/omareader-host",\n  "type": "stdio",\n  "allowed_origins": ["chrome-extension://%s/"]\n}\n' "$_pkg" "$_extid")
+  # install.sh registers com.bhp.omareader in the user config, and Chromium
+  # prefers that file. This name exists only in the system directories, so the
+  # extension can see the package when the per-user host is stale or missing.
+  probe=$(printf '{\n  "name": "com.bhp.omareader.pkg",\n  "description": "Omareader packaged host probe",\n  "path": "/usr/lib/%s/omareader-host",\n  "type": "stdio",\n  "allowed_origins": ["chrome-extension://%s/"]\n}\n' "$_pkg" "$_extid")
 
   # Chromium's directory also serves Brave and Brave Origin.
   for d in /usr/share/chromium/extensions /usr/share/google-chrome/extensions /usr/share/microsoft-edge/extensions; do
@@ -55,6 +59,7 @@ package() {
   for d in /etc/chromium/native-messaging-hosts /etc/opt/chrome/native-messaging-hosts /etc/opt/edge/native-messaging-hosts; do
     install -dm755 "$pkgdir$d"
     printf '%s\n' "$host" > "$pkgdir$d/com.bhp.omareader.json"
+    printf '%s\n' "$probe" > "$pkgdir$d/com.bhp.omareader.pkg.json"
   done
 
   install -Dm644 "$_pkg/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
